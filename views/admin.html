@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title><%= title %></title>
+    <link href="/stylesheets/style.css" rel="stylesheet" />
+</head>
+<body>
+    <h1><%= title %></h1>
+    <p>
+        Hello administrator <%= login.name %>. 
+    </p>
+    <p>
+        Current allowed roles for this page:
+    </p>
+    <ul>
+        <% acl.roles.forEach(function(r) {%>
+        <li>role: <b><%= r %></b></li>
+        <% }) %>
+    </ul>
+    <p>
+        Current allowed endpoints for this page:
+    </p>
+    <ul>
+        <% acl.endpoints.forEach(function(e) {%>
+        <li>endpoint: <b><%= e %></b></li>
+        <% }) %>
+    </ul>
+    <% if (login) { %>
+    <p>
+        Your endpoint is: <%= login.eid %>
+    </p>
+    <p>
+        You are in roles:
+        <ul>
+            <% login.roles.forEach(function(r) { %>
+            <li>role: <%= r %></li>
+            <% }) %>
+        </ul>
+    </p>
+    <% } %>
+    <p>
+        Access other pages:
+    </p>
+    <ul>
+        <li>
+            <a href="/">Home page</a>
+        </li>
+        <li>
+            <a href="/work">Work page</a>
+        </li>
+        <li>
+            <a href="/logout">Logout</a>
+        </li>
+    </ul>
+</body>
+</html>
