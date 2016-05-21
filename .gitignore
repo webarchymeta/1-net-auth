@@ -8,7 +8,7 @@
 *.sln.docstates
 .ntvs_analysis.dat
 config/config.js
-data/
+data/database.json
 
 # Build results
 

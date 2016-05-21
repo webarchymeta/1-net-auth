@@ -31,12 +31,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="config\sample-config.js" />
     <Compile Include="config\config.js" />
     <Compile Include="lib\1-net-oauth2.js" />
     <Compile Include="lib\error-catchers.js" />
     <Compile Include="lib\user-store.js" />
     <Compile Include="routes\index.js" />
     <Content Include="data\database.json" />
+    <Content Include="data\sample-database.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="views\access-denied.html" />
