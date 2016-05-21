@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
@@ -7,28 +7,11 @@
 </head>
 <body>
     <h1><%= title %></h1>
-    <p>
-        Welcome <%= (login ? " back, " + login.name : "to " + title) %>. This is a public accessible page. 
-    </p>
-    <% if (login) { %>
-    <p>
-        Your endpoint is: <%= login.eid %>
-    </p>
-    <p>
-        You are in roles:
-        <ul>
-            <% login.roles.forEach(function(r) { %>
-            <li>role: <%= r %></li>
-            <% }) %>
-        </ul>
-    </p>
-    <% } %>
-    <p>
-        Access other pages:
-    </p>
+    <%- content %>
+    <hr />
     <ul>
         <li>
-            <a href="/readme">Readme</a>
+            <a href="/">Home page</a>
         </li>
         <li>
             <a href="/work">Work page</a>

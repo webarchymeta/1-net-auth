@@ -1,6 +1,8 @@
 ﻿'use strict';
 
-let express = require('express'),
+let fs = require('fs'),
+    express = require('express'),
+    marked = require('marked'),
     router = express.Router(),
     path = require('path'),
     config = require(path.join(__dirname, '../config/config')),
@@ -36,6 +38,16 @@ router.get('/admin', auth.check('admin_page_acl'), (req, res) => {
 
 router.get('/work', auth.check(), (req, res) => {
     res.render('work.html', { title: 'Work page', login: req.user });
+});
+
+router.get('/readme', (req, res, next) => {
+    fs.readFile(path.join(__dirname, '../README.md'), (err, mkd) => {
+        if (err) {
+            return next(err);
+        } else {
+            res.render('readme.html', { title: 'Info', login: req.user, content: marked(mkd) });
+        }
+    });
 });
 
 router.get('/', (req, res) => {
