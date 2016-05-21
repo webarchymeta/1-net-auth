@@ -41,7 +41,7 @@ router.get('/work', auth.check(), (req, res) => {
 });
 
 router.get('/readme', (req, res, next) => {
-    fs.readFile(path.join(__dirname, '../README.md'), (err, mkd) => {
+    fs.readFile(path.join(__dirname, '../README.md'), 'utf8', (err, mkd) => {
         if (err) {
             return next(err);
         } else {
