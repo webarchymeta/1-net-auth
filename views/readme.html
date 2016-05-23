@@ -1,31 +1,32 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title><%= title %></title>
+    <title>综述</title>
     <link href="/stylesheets/style.css" rel="stylesheet" />
 </head>
 <body>
-    <h1><%= title %></h1>
-    <%- content %>
-    <hr />
-    <ul>
-        <li>
-            <a href="/">Home page</a>
-        </li>
-        <li>
-            <a href="/work">Work page</a>
-        </li>
-        <li>
-            <a href="/admin">Administration page</a>
-        </li>
-        <li>
-            <% if (login) { %>
-            <a href="/logout">Logout</a>
-            <% } else { %>
-            <a href="/login">Login</a>
-            <% } %>
-        </li>
-    </ul>
+    <h1 class="header">综述</h1>
+    <% include introduction.html %>
+    <div class="nav">
+        <ul>
+            <li>
+                <a href="/">Home page</a>
+            </li>
+            <li>
+                <a href="/work">Work page</a>
+            </li>
+            <li>
+                <a href="/admin">Administration page</a>
+            </li>
+            <li>
+                <% if (login) { %>
+                <a href="/logout">Logout</a>
+                <% } else { %>
+                <a href="/login">Login</a>
+                <% } %>
+            </li>
+        </ul>
+    </div>
 </body>
 </html>

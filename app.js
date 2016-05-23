@@ -13,9 +13,9 @@ const _ = require('lodash'),
     userStore = require(path.join(__dirname, 'lib/user-store')),
     oauth = require(path.join(__dirname, 'lib/1-net-oauth2'));
 
-oauth.initialize(config, userStore);
-
 const app = express();
+
+oauth.initialize(config.oauth, userStore);
 const routes = require('./routes/index');
 
 if (process.cwd() !== __dirname) {

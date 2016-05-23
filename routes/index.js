@@ -2,12 +2,14 @@
 
 let fs = require('fs'),
     express = require('express'),
-    marked = require('marked'),
+    //marked = require('marked'),
     router = express.Router(),
     path = require('path'),
     config = require(path.join(__dirname, '../config/config')),
     oauth = require(path.join(__dirname, '../lib/1-net-oauth2')),
     userStore = require(path.join(__dirname, '../lib/user-store'));
+
+const _BOM = /^\uFEFF/;
 
 let auth =  new oauth();
 
@@ -41,13 +43,7 @@ router.get('/work', auth.check(), (req, res) => {
 });
 
 router.get('/readme', (req, res, next) => {
-    fs.readFile(path.join(__dirname, '../README.md'), 'utf8', (err, mkd) => {
-        if (err) {
-            return next(err);
-        } else {
-            res.render('readme.html', { title: 'Info', login: req.user, content: marked(mkd) });
-        }
-    });
+    res.render('readme.html', { login: req.user });
 });
 
 router.get('/', (req, res) => {

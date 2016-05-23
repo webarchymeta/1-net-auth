@@ -1,0 +1,234 @@
+﻿<h1>一网认证服务使用说明</h1>
+<h2>认证各方</h2>
+<ul>
+    <li>认证提供方：即一网。这里称为“甲方”。</li>
+    <li>认证客户方：即具体使用认证提供方认证信息并对外提供增值业务的服务方。这里成为“乙方”。</li>
+    <li>终端客户方：即使用乙方应用且需要认证的终端用户。</li>
+</ul>
+<h2>认证内容</h2>
+<p>
+    一网除了提供用户身份认证外，还自动提供用户经认证的（应用）端点信息，等效于双因子认证。乙方可以充分利用这些信息提供基于<strong>身份</strong>、<strong>角色</strong>、<strong>端点</strong>以及将它们综合应用的精细和安全的访问控制服务，来体现自己的竞争力。所提供的本演示系统可以提供基于**角色**和**端点**的访问控制。
+</p>
+<h2>对接任务</h2>
+<p>
+    就认证这块来说，与甲方对接逻辑主要在乙方的服务端完成。对于（乙方）客户应用端来说，一网提供的JavaScript库已经足以完成其任务，无须乙方进一步开发。在服务端，甲方提供基于OAuth2标准的服务接口供乙方使用。甲方还可以提供ASP.NET和node的对接库。其中node版本提供较为详细的说明和功能覆盖，对于基于其它语言的服务端须要乙方根据OAuth2协议和所提供两种库和应用原型例程自己开发。
+</p>
+<p>
+    node版本的库和应用原型大量应用函数式编程方法和部分ECMAScript 6（Javascript 版本）语法，并使用<a href="https://promisesaplus.com/" target="_blank">Promise/A+</a>（由 <a href="https://github.com/petkaantonov/bluebird" target="_blank">bluebird</a> 实现）规范处理异步操作，可避免在处理复杂（异步）事件回调时传统方法容易导致所谓的“回调地狱”困境，
+    使得代码逻辑较为紧凑和清晰。但须要阅读者在这些方面预先了解相关的知识。例如：
+</p>
+<pre><code>    (...) => { 
+        ... 
+    }
+</code></pre>
+<p style="text-indent: 0">
+    代表的是函数
+</p>
+<pre><code>    function (...) {
+        ...
+    }
+</code></pre>
+<p style="text-indent: 0">
+    等等。
+</p>
+<h2>有关node版本</h2>
+<p>
+    以下重点对node版本的库和应用原型进行说明。系统包含三大模块：<strong>应用网站原型</strong>、<strong>OAuth2客户端</strong>以及用户<strong>数据库原型</strong>:
+</p>
+<ol>
+    <li>
+        <h3>应用网站原型</h3>
+        <p>
+            基于 <a href="https://github.com/expressjs/express" target="_blank">express</a> 框架实现。原型可以通过在其根目录中运行
+        </p>
+<pre><code>&gt;&gt;&nbsp;node app.js
+</code></pre>
+        <p>
+            命令行指令启动。其监听口和IP地址可以在位于 <code>config</code> 目录下的 <code>config.js</code> 配置文件中设置：
+        </p>
+<pre><code>let config = {
+    ip: "... ip address ...",
+    port: "... port ...",
+    ...
+};
+</code></pre>
+        <p>
+            在 <code>express</code> 中所有请求都通过按一定次序排列的"中间件"依次处理完成。所有中间件都具有统一的调用模式的函数处理，即
+        </p>
+<pre><code>    (request, response, next) => {
+        ... 处理请求 ...
+    }
+</code></pre>
+        <p>
+            原型应用包含几个页面，分别使用不同的访问控制策略。
+        </p>
+        <ul>
+            <li>
+                <strong>Home</strong>页：访问不须要用户认证。
+            </li>
+            <li>
+                <strong>Readme</strong>页：本页。访问不须要用户认证。
+            </li>
+            <li>
+                <p>
+                    <strong>Work</strong>页：访问须要用户认证，但所有签入用户都可以访问。访问控制是通过在页面路由脚本（由<code>routes/index.js</code>文件定义）中对相关路由规则添加用户认证中间件完成：
+                </p>
+<pre><code>    router.get('/work', <span style="color:blue">auth.check()</span>, (req, res) => {
+        res.render('work.html', { title: 'Work page', login: req.user });
+    });
+</code></pre>
+                <p>
+                    这里认证中间件<code>auth.check()</code>由OAuth2客户端库提供（它的调用返回一个满足express中间件调用模式的函数），被插入在页面返回处理中间件
+                </p>
+<pre><code>    (req, res) => {
+        res.render('work.html', { title: 'Work page', login: req.user });
+    };
+</code></pre>
+                <p>
+                    之前（在这里<code>next</code>参数被忽略，原因是它是最后一个“中间件”）。在这里<code>auth.check</code>调用不含任何参数，表示没有访问控制意图。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <strong>Administration</strong>页：访问须要用户认证，但并非所有签入用户都可以访问。系统根据后台制定的规则，限制访问该页所需要的角色和端点。访问控制同样是通过该页面相关路由规则插入用户认证中间件完成。
+                </p>
+<pre><code>    router.get('/admin', <span style="color:blue">auth.check('admin_page_acl')</span>, (req, res) => {
+        <span style="text-decoration: line-through">userStore.accessControlList('admin_page_acl').then((acl) => {</span>
+            res.render('admin.html', { title: 'Administration page', acl: acl, login: req.user });
+        <span style="text-decoration: line-through">});</span>
+    });
+</code></pre>
+                <p>
+                    注意这里<code>userStore.accessControlList('admin_page_acl')</code>调用只是为了在用户数据库中获取用户访问控制表以便在相关页面中显示，在实际应用中是不必要的。这里认证中间件<code>auth.check('admin_page_acl')</code>的调用参数
+                    <code>'admin_page_acl'</code>对应于用户数据库中访问控制表中的一组访问控制数据。在本原型应用中，用户数据库保存在位于<code>data</code>目录中的JSON格式的<code>database.json</code>文件中。该控制数据在数据库文件中的名称是
+                    “access_controls”。其内容是：
+                </p>
+<pre><code>    "admin_page_acl": {
+        "roles": [
+            "administrators/system",
+            "administrators/website"
+        ],
+        "endpoints": [
+            "df4d0d95-dc78-4d5a-8c87-63dddecdf6fe",
+            "bbff89de-93f3-4480-b969-c8ca6779c601"
+        ]
+    }
+</code></pre>
+                <p>
+                    表示只有拥有“roles”角色列表中的角色，并且在标识为“endpoints”白名单中一个的端点上访问时，该网页才可以被允许访问。允许访问端点的标识则需根据具体测试环境在数据库的“endpoints”端点白名单中添加。
+                    允许访问的角色在“roles”添加，添加的角色由乙方系统定义。相应账户所拥有的角色在“user_roles”表中添加，其中每个条目的键值都对应于某一网账户的标识，其内容是该账户所拥有的角色列表。例如
+                </p>
+<pre><code>    "user_roles": {
+        "c86415a6-2cd9-4e62-8c27-b8e1dfe02802": [
+            "administrators/system",
+            "administrators/website"
+        ]
+    }
+</code></pre>
+                <p>
+                    如果希望使用某端点访问此页时，首先用户要使用该端点，在一（一网）账户签入网站，然后用户就可在首页上读取相应的端点标识。使用一编辑器将从页面上读取的标识添加到“endpoints”白名单表中即可。所提供
+                    的相应列表只起演示的作用，开发人员测试时应将它们替换为自己端点的标识。管理员还可以使用编辑器在 <code>database.json</code> 文件中的“access_controls”添加具有任意标识（访问控制策略ID）的不同
+                    访问控制策略条目，当需要使用它时，只要将此表识作为参数调用
+                    <code>auth.check('...访问控制策略ID...')</code> 即可得到相应的中间件。在实际应用中，乙方的数据库系统须根据策略ID返回同样格式的访问控制策略数据。
+                </p>
+                <p>
+                    如果不想限制访问端点，可在相应访问控制策略中删除“endpoints”白名单。如果不想使用角色限制访问，可在相应访问控制策略中删除“roles”白名单。注意这里删除指的并非是将其内容清空，而是不添加该条目。
+                </p>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <h3>OAuth2客户端库</h3>
+        <p>
+            该库有与OAuth2有关的 <code>check</code>、<code>refresh</code> 和 <code>callback</code> 三个调用接口以及与用户签入和签出有关的 <code>login</code> 和 <code>logout</code> 两个调用接口。
+        </p>
+        <h3 class="header">配置注入</h3>
+        <p>
+            库使用的各类参数是通过配置文件设置的。此原型应用的有关配置文件是 <code>config</code> 目录中的 <code>config.js</code> 文件。相关的配置全部包含在其中的 “oauth”节点中：
+        </p>
+<pre><code>    oauth: {
+        debugMode: true,
+        accessProtocol: 'http',
+        authKey: '...',
+        viewType: 'browser',
+        returnPath: '/external_signin',
+        vnet: {
+            clientId: '...',
+            clientSecret: '...',
+            scope: ['user', 'duration:3600'],
+            endponts: {
+                baseUrl: 'https://oauth2.api.yiwg.net',
+                authorize: {
+                    apiPathFmt: '/api/signin/{0}/authorize'
+                },
+                token: {
+                    apiPath: '/api/signin/token'
+                },
+                user: {
+                    apiPath: 'api/signin/user'
+                }
+            }
+        }
+    }
+</code></pre>
+        这里的 <code>accessProtocol</code> 是乙方应用在公网上的入口使用的HTTP协议，可选值为<code>http</code> 和 <code>https</code>； <code>authKey</code> 是一用户自设的随机密钥，用来对认证过程的敏感数据加密； 
+        <code>viewType</code> 是用来选择一网签入界面的，可选值是“browser”、“mobile”和“desktop”； <code>returnPath</code> 
+        是用户从一网认证完并取得授权码后一网将客户端重新定向到乙方的路径。在本原型应用中系统的路由（见 <code>routes/index.js</code>）已经包含处理函数：
+<pre><code>router.get(config.oauth.<span style="color: red">returnPath</span>, (req, res, next) => {
+    auth.callback(req).then(result => {
+        if (!result.ok) {
+            next('login failed');
+        }
+        return auth.login(req, result).then(() => {
+            res.redirect(result.returnTo);
+        });
+    }).catch(() => {
+        next('login failed');
+    }).done();
+});
+</code></pre>
+        <p>这里的处理函数首先调用了上述 <code>callback</code> 之后又调用了 <code>login</code> 接口。乙方在所涉设置中设置一个 <code>authKey</code>， 填入通过甲方获取的 
+        <code>clientId</code>、<code>clientSecret</code>以及<code>endponts</code> 中的 <code>baseUrl</code> 后即可正常启动原型应用。</p>
+        <h3 class="header">依赖注入</h3>
+        <p>
+            OAuth2客户端库依赖于应用系统所提供的配置信息和用户数据库系统，通过预设的接口获取设置或者与数据库互动。这两种依赖都须在应用启动阶段注入。在当前的设计中，这些依赖的注入都必须在加载所有与认证有关的路由器之前。例如在
+            本原型应用的启动文件 <code>app.js</code> 中：
+        </p>
+<pre><code>const _ = require('lodash'),
+    express = require('express'),
+    ...
+    config = require('./config/config'),
+    userStore = require(path.join(__dirname, 'lib/user-store')),
+    oauth = require(path.join(__dirname, 'lib/1-net-oauth2'));
+
+const app = express();
+<span style="color: green">// 注入依赖 </span>
+oauth.initialize(config.oauth, userStore);
+<span style="color: green">// 加载路由器 </span>
+const routes = require('./routes/index');
+...
+</code></pre>
+        <p>
+            本认证库依赖于用户数据库系统提供的以下接口：
+            <ul>
+                <li>
+                    <code>mapUser(req, authInfo)</code>：
+                </li>
+                <li>
+                    <code>updateToken(req, token)</code>：
+                </li>
+                <li>
+                    <code>unmapUser(user)</code>：
+                </li>
+                <li>
+                    <code>getAccessControl(policyId)</code>：
+                </li>
+            </ul>
+        </p>
+    </li>
+    <li>
+        <h3>数据库原型</h3>
+        <p>
+        </p>
+    </li>
+</ol>

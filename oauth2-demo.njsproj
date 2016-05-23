@@ -44,7 +44,8 @@
     <Content Include="views\access-denied.html" />
     <Content Include="views\admin.html" />
     <Content Include="views\index.html" />
-    <Content Include="views\index.jade" />
+    <Content Include="views\introduction.html" />
+    <Content Include="views\readme.html" />
     <Content Include="views\work.html" />
   </ItemGroup>
   <ItemGroup>
