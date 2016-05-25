@@ -14,7 +14,8 @@
     就认证这块来说，与甲方对接逻辑主要在乙方的服务端完成。对于（乙方）客户应用端来说，一网提供的JavaScript库已经足以完成其任务，无须乙方进一步开发。在服务端，甲方提供基于OAuth2标准的服务接口供乙方使用。甲方还可以提供ASP.NET和node的对接库。其中node版本提供较为详细的说明和功能覆盖，对于基于其它语言的服务端须要乙方根据OAuth2协议和所提供两种库和应用原型例程自己开发。
 </p>
 <p>
-    node版本的库和应用原型大量应用函数式编程方法和部分ECMAScript 6（Javascript 版本）语法，并使用<a href="https://promisesaplus.com/" target="_blank">Promise/A+</a>（由 <a href="https://github.com/petkaantonov/bluebird" target="_blank">bluebird</a> 实现）规范处理异步操作，可避免在处理复杂（异步）事件回调时传统方法容易导致所谓的“回调地狱”困境，
+    node版本的库和应用原型大量应用函数式编程方法和部分ECMAScript 6（Javascript 版本）语法，并使用 
+    <a href="https://promisesaplus.com/" target="_blank">Promise/A+</a>（由 <a href="https://github.com/petkaantonov/bluebird" target="_blank">bluebird</a> 实现）规范处理异步操作，可避免在处理复杂（异步）事件回调时传统方法容易导致所谓的“回调地狱”困境，
     使得代码逻辑较为紧凑和清晰。但须要阅读者在这些方面预先了解相关的知识。例如：
 </p>
 <pre><code>    (...) => { 
@@ -140,11 +141,26 @@
     <li>
         <h3>OAuth2客户端库</h3>
         <p>
-            该库有与OAuth2有关的 <code>check</code>、<code>refresh</code> 和 <code>callback</code> 三个调用接口以及与用户签入和签出有关的 <code>login</code> 和 <code>logout</code> 两个调用接口。
+            OAuth2客户端库依赖于应用系统所提供的配置信息和用户数据库系统，通过预设的接口获取设置和与乙方数据系统对接。这两种依赖都须在应用启动阶段注入。在当前的设计中，这些依赖的注入都必须在加载所有与认证有关的路由器之前。例如在
+            本原型应用的启动文件 <code>app.js</code> 中：
         </p>
-        <h3 class="header">配置注入</h3>
+<pre><code>const _ = require('lodash'),
+    express = require('express'),
+    ...
+    config = require('./config/config'),
+    userStore = require(path.join(__dirname, 'lib/user-store')),
+    oauth = require(path.join(__dirname, 'lib/1-net-oauth2'));
+const app = express();
+<span style="color: green">// 注入依赖 </span>
+oauth.initialize(config.oauth, userStore);
+<span style="color: green">// 加载路由器 </span>
+const routes = require('./routes/index');
+...
+</code></pre>
+        <h3 class="header">配置格式</h3>
         <p>
-            库使用的各类参数是通过配置文件设置的。此原型应用的有关配置文件是 <code>config</code> 目录中的 <code>config.js</code> 文件。相关的配置全部包含在其中的 “oauth”节点中：
+            库使用的各类参数通过JSON格式的配置文件设置。此原型应用的有关配置文件是 <code>config</code> 目录中名为 <code>config.js</code> 的文件，起始时该文件并不存在，乙方应该自己创建它。
+            该目录中已经有一个名为<code>sample-config.js</code>的样本设置文件，乙方可以借鉴它的格式结合自己的参数来建立初始的<code>config.js</code>。认证相关的配置全部包含在其中的 “oauth”节点中：
         </p>
 <pre><code>    oauth: {
         debugMode: true,
@@ -189,46 +205,76 @@
 </code></pre>
         <p>这里的处理函数首先调用了上述 <code>callback</code> 之后又调用了 <code>login</code> 接口。乙方在所涉设置中设置一个 <code>authKey</code>， 填入通过甲方获取的 
         <code>clientId</code>、<code>clientSecret</code>以及<code>endponts</code> 中的 <code>baseUrl</code> 后即可正常启动原型应用。</p>
-        <h3 class="header">依赖注入</h3>
-        <p>
-            OAuth2客户端库依赖于应用系统所提供的配置信息和用户数据库系统，通过预设的接口获取设置或者与数据库互动。这两种依赖都须在应用启动阶段注入。在当前的设计中，这些依赖的注入都必须在加载所有与认证有关的路由器之前。例如在
-            本原型应用的启动文件 <code>app.js</code> 中：
-        </p>
-<pre><code>const _ = require('lodash'),
-    express = require('express'),
-    ...
-    config = require('./config/config'),
-    userStore = require(path.join(__dirname, 'lib/user-store')),
-    oauth = require(path.join(__dirname, 'lib/1-net-oauth2'));
-
-const app = express();
-<span style="color: green">// 注入依赖 </span>
-oauth.initialize(config.oauth, userStore);
-<span style="color: green">// 加载路由器 </span>
-const routes = require('./routes/index');
-...
-</code></pre>
+        <h3 class="header">依赖接口</h3>
         <p>
             本认证库依赖于用户数据库系统提供的以下接口：
-            <ul>
-                <li>
-                    <code>mapUser(req, authInfo)</code>：
-                </li>
-                <li>
-                    <code>updateToken(req, token)</code>：
-                </li>
-                <li>
-                    <code>unmapUser(user)</code>：
-                </li>
-                <li>
-                    <code>getAccessControl(policyId)</code>：
-                </li>
-            </ul>
+        </p>
+        <ul>
+            <li>
+                <code>mapUser(req, authInfo)</code>：当使用用户授权令牌，成功从一网服务获取签入令牌（“access token”）和用户详细信息后，本库将这两者数据打包在 <code>authInfo</code> 内并调用
+                <code>mapUser(req, authInfo)</code>。乙方应根据自我的应用逻辑决定怎样使用该信息。
+            </li>
+            <li>
+                <code>updateToken(req, token)</code>：当本库发现用户的签入令牌已经过期并成功刷新签入令牌后，将调用 <code>updateToken(req, token)</code>。这里的 <code>token</code> 是新获得的签入令牌。
+                同样，怎样使用该信息是乙方自己的责任。
+            </li>
+            <li>
+                <code>unmapUser(user)</code>：当用户成功签出后，本库将调用 <code>unmapUser(user)</code>。这里的 <code>user</code> 不但包含（一网）用户标识，还包含当前终端的标识。
+            </li>
+            <li>
+                <code>getAccessControl(policyId)</code>：本库根据认证请求的策略ID（<code>policyId</code>），调用该接口来得到相应的访问控制策略。
+            </li>
+        </ul>
+        <h3 class="header">提供接口</h3>
+        <p>
+            本库提供与OAuth2有关的 <code>check</code>、<code>refresh</code> 和 <code>callback</code> 三个调用接口以及与用户签入和签出有关的 <code>login</code> 和 <code>logout</code> 两个调用接口。
+        </p>
+        <ul>
+            <li>
+                <p>
+                    <code>check</code>：基于提供的一个可空的访问控制策略ID，返回应 OAuth2 认证中间件。如果用户尚未签入，则启动OAuth2认证流程。如果访问控制策略ID为非空并且查找到相应策略，根据所得策略检查该访问是否可以放行。
+                    对于可以放行的访问，检查相应的访问令牌是否过期。如果访问令牌已经过期，先对令牌进行更新。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>refresh</code>：主动更新已有的访问令牌。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>callback</code>：在OAuth2认证流程中，当用户在一网认证完成并得到对乙方的授权令牌后，用户的客户端应用端应用携带该授权令牌回访在预先设置的“returnPath”，乙方系统接收访问并调用本库的 <code>callback</code>
+                    接口进行处理。
+            </li>
+            <li>
+                <code>login</code>：如果用户OAuth2认证流程成功结束，乙方系统调用该接口来保存所得到的访问令牌并建立签入会话（session），以便用户不用每次访问都须要走认证流程。
+            </li>
+            <li>
+                <code>logout</code>：签出已经建立的签入会话，并对已保存的签入状态信息进行更新。
+            </li>
+        </ul>
+        <p>
+            更加详细的信息在本库的源代码文件中可以找到。目前关于本库的源代码文件只有一个，它在 <code>lib</code> 目录下，名为 <code>1-net-oauth2.js</code>。
+        </p>
+        <h3 class="header">数据结构</h3>
+        <p>
+            用户成功认证后本库返回JSON格式的签入令牌和（一网）用户细节。乙方可以通过观察本原型应用的位于 <code>data</code> 目录中的 <code>database.json</code> 文件中的“user_auth_table”节点得到相关信息。
+            该节点中的键值对应于签入账户的（一网）标识，其对应对象中的“user_details”则承载相应账户的细节信息，而“auth_tokens”对象则包含签入该账户的不同端点所得到的签入令牌。其中的系列键值就是该端点的标识，
+            而其对应的内容就是签入令牌。
+        </p>
+        <p>
+            “user_auth_table”节点在原型应用没有任何用户签入时是空的（这只是随意的设计，没有其他考量。乙方可根据自身的需求对签出用户在 <code>unmapUser(user)</code> 中处理。），因此要想得到相应的数据结构信息，
+            至少须要在一个用户签入的情况下才行。
         </p>
     </li>
     <li>
         <h3>数据库原型</h3>
         <p>
+            本原型应用使用JSON对象保存所有相关数据。该JSON对象使用文件系统进行持久化。相关的实现在 <code>lib</code> 目录下的 <code>user-store.js</code> 文件中可以找到。数据文件是 <code>data</code> 
+            目录中的 <code>database.json</code>。开始时该文件并不存在，应用第一次运行时会创建一个空的文件。用户可以参考同目录中的 <code>sample-database.json</code> 的结构对其进行修改。
+        </p>
+        <p>
+            用户可以通过通用文字编辑器实时修改该文件，例如添加或修改的访问策略、添加或修改用户的角色等，修改的结果可以立即体现出来，并不必重启应用。
         </p>
     </li>
 </ol>

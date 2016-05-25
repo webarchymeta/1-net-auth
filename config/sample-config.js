@@ -19,10 +19,10 @@ module.exports = {
     ip: localAccessIP,
     port: localAccessPort,
     cookieSessionKeys: ['092EC17EF84F54EEEA', '390271DDBD0ABEB72A9D00104C'],
-    debugMode: true,
-    accessProtocol: 'http',
-    authKey: '37CE30EC2697C7666ABBDAC3E41A1FAE',
     oauth: {
+        debugMode: true,
+        accessProtocol: 'http',
+        authKey: '37CE30EC2697C7666ABBDAC3E41A1FAE',
         viewType: 'browser',
         returnPath: '/external_signin',
         vnet: {
