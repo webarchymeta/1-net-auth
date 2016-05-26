@@ -16,11 +16,15 @@
                 "administrators/system",
                 "administrators/website"
             ],
-            "endpoints": [
-                "df4d0d95-dc78-4d5a-8c87-63dddecdf6fe",
-                "bbff89de-93f3-4480-b969-c8ca6779c601"
-            ]
+            "endpoints": {
+                "whitelist": [
+                    "df4d0d95-dc78-4d5a-8c87-63dddecdf6fe",
+                    "bbff89de-93f3-4480-b969-c8ca6779c601"
+                ],
+                "blacklist": [
+                ]
+            }
         }
     },
-    "user_auth_table": {}
-}
+        "user_auth_table": { }
+    }
