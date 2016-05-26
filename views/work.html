@@ -15,6 +15,7 @@
     <p>
         Your endpoint is: <%= login.eid %>
     </p>
+    <% if (login.roles) { %>
     <p>
         You are in roles:
         <ul>
@@ -23,6 +24,11 @@
             <% }) %>
         </ul>
     </p>
+    <% } else { %>
+    <p>
+        You do not have any role, add roles to the <code>user_roles -&gt; <%= login.id %></code> list of the database file <code>data/database.json</code>.
+    </p>
+    <% } %>
     <% } %>
     <p>
         Access other pages:

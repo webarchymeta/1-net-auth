@@ -33,7 +33,7 @@ router.get('/login', auth.check(), (req, res) => {
 });
 
 router.get('/admin', auth.check('admin_page_acl'), (req, res) => {
-    userStore.accessControlList('admin_page_acl').then((acl) => {
+    userStore.getAccessControl('admin_page_acl').then((acl) => {
         res.render('admin.html', { title: 'Administration page', acl: acl, login: req.user });
     });
 });

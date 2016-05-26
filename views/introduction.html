@@ -7,7 +7,7 @@
 </ul>
 <h2>认证内容</h2>
 <p>
-    一网除了提供用户身份认证外，还自动提供用户经认证的（应用）端点信息，等效于双因子认证。乙方可以充分利用这些信息提供基于<strong>身份</strong>、<strong>角色</strong>、<strong>端点</strong>以及将它们综合应用的精细和安全的访问控制服务，来体现自己的竞争力。所提供的本演示系统可以提供基于**角色**和**端点**的访问控制。
+    一网除了提供用户身份认证外，还自动提供用户经认证的（应用）端点信息，等效于双因子认证。乙方可以充分利用这些信息提供基于<strong>身份</strong>、<strong>角色</strong>、<strong>端点</strong>以及将它们综合应用的精细和安全的访问控制服务，来体现自己的竞争力。所提供的本演示系统可以提供基于<strong>角色</strong>和<strong>端点</strong>黑白名单的访问控制。
 </p>
 <h2>对接任务</h2>
 <p>
@@ -94,13 +94,13 @@
                     <strong>Administration</strong>页：访问须要用户认证，但并非所有签入用户都可以访问。系统根据后台制定的规则，限制访问该页所需要的角色和端点。访问控制同样是通过该页面相关路由规则插入用户认证中间件完成。
                 </p>
 <pre><code>    router.get('/admin', <span style="color:blue">auth.check('admin_page_acl')</span>, (req, res) => {
-        <span style="text-decoration: line-through">userStore.accessControlList('admin_page_acl').then((acl) => {</span>
+        <span style="text-decoration: line-through">userStore.getAccessControl('admin_page_acl').then((acl) => {</span>
             res.render('admin.html', { title: 'Administration page', acl: acl, login: req.user });
         <span style="text-decoration: line-through">});</span>
     });
 </code></pre>
                 <p>
-                    注意这里<code>userStore.accessControlList('admin_page_acl')</code>调用只是为了在用户数据库中获取用户访问控制表以便在相关页面中显示，在实际应用中是不必要的。这里认证中间件<code>auth.check('admin_page_acl')</code>的调用参数
+                    注意这里<code>userStore.getAccessControl('admin_page_acl')</code>调用只是为了在用户数据库中获取用户访问控制表以便在相关页面中显示，在实际应用中是不必要的。这里认证中间件<code>auth.check('admin_page_acl')</code>的调用参数
                     <code>'admin_page_acl'</code>对应于用户数据库中访问控制表中的一组访问控制数据。在本原型应用中，用户数据库保存在位于<code>data</code>目录中的JSON格式的<code>database.json</code>文件中。该控制数据在数据库文件中的名称是
                     “access_controls”。其内容是：
                 </p>

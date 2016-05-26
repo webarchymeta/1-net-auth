@@ -18,18 +18,31 @@
         <li>role: <b><%= r %></b></li>
         <% }) %>
     </ul>
+    <% if (acl.endpoints.whitelist) { %>
     <p>
-        Current allowed endpoints for this page:
+        Allowed endpoints:
     </p>
     <ul>
-        <% acl.endpoints.forEach(function(e) {%>
+        <% acl.endpoints.whitelist.forEach(function(e) {%>
         <li>endpoint: <b><%= e %></b></li>
         <% }) %>
     </ul>
+    <% } %>
+    <% if (acl.endpoints.blacklist) { %>
+    <p>
+        Denied endpoints:
+    </p>
+    <ul>
+        <% acl.endpoints.blacklist.forEach(function(e) {%>
+        <li>endpoint: <b><%= e %></b></li>
+        <% }) %>
+    </ul>
+    <% } %>
     <% if (login) { %>
     <p>
         Your endpoint is: <%= login.eid %>
     </p>
+    <% if (login.roles) { %>
     <p>
         You are in roles:
         <ul>
@@ -38,6 +51,11 @@
             <% }) %>
         </ul>
     </p>
+    <% } else { %>
+    <p>
+        You do not have any role, add roles to the <code>user_roles -&gt; <%= login.id %></code> list of the database file <code>data/database.json</code>.
+    </p>
+    <% } %>
     <% } %>
     <p>
         Access other pages:
