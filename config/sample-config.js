@@ -22,15 +22,15 @@ module.exports = {
     oauth: {
         debugMode: true,
         accessProtocol: 'http',
-        authKey: '37CE30EC2697C7666ABBDAC3E41A1FAE',
+        authKey: '--- create your random security key ---',
         viewType: 'browser',
         returnPath: '/external_signin',
         vnet: {
-            clientId: '88cbb41e-3d64-430a-a13c-944a6ffcbc7a',
-            clientSecret: 'm|coqedg:(*/9/CaGJA~SqZu~p1)lf5c',
+            clientId: '--- your client id ---',
+            clientSecret: '--- your client secret ---',
             scope: ['user', 'duration:3600'],
             endponts: {
-                baseUrl: 'https://192.168.1.200:3232',
+                baseUrl: 'https://www.yiwg.net:8787',
                 authorize: {
                     apiPathFmt: '/api/signin/{0}/authorize'
                 },
