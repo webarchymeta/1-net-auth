@@ -18,6 +18,7 @@
         <li>role: <b><%= r %></b></li>
         <% }) %>
     </ul>
+    <hr />
     <% if (acl.endpoints.whitelist) { %>
     <p>
         Allowed endpoints:
@@ -27,6 +28,7 @@
         <li>endpoint: <b><%= e %></b></li>
         <% }) %>
     </ul>
+    <hr />
     <% } %>
     <% if (acl.endpoints.blacklist) { %>
     <p>
@@ -37,6 +39,7 @@
         <li>endpoint: <b><%= e %></b></li>
         <% }) %>
     </ul>
+    <hr />
     <% } %>
     <% if (login) { %>
     <p>

@@ -2,7 +2,7 @@
 <h2>认证各方</h2>
 <ul>
     <li>认证提供方：即一网。这里称为“甲方”。</li>
-    <li>认证客户方：即具体使用认证提供方认证信息并对外提供增值业务的服务方。这里成为“乙方”。</li>
+    <li>认证客户方：即具体使用甲方认证信息并对外提供增值业务的服务方。这里成为“乙方”。</li>
     <li>终端客户方：即使用乙方应用且需要认证的终端用户。</li>
 </ul>
 <h2>认证内容</h2>
@@ -11,10 +11,10 @@
 </p>
 <h2>对接任务</h2>
 <p>
-    就认证这块来说，与甲方对接逻辑主要在乙方的服务端完成。对于（乙方）客户应用端来说，一网提供的JavaScript库已经足以完成其任务，无须乙方进一步开发。在服务端，甲方提供基于OAuth2标准的服务接口供乙方使用。甲方还可以提供ASP.NET和node的对接库。其中node版本提供较为详细的说明和功能覆盖，对于基于其它语言的服务端须要乙方根据OAuth2协议和所提供两种库和应用原型例程自己开发。
+    就认证这块来说，与甲方对接逻辑主要在乙方的服务端完成。对于为终端客户方开发的应用端来说，一网提供的JavaScript库已经足以完成其任务，无须乙方进一步开发。在服务端，甲方提供基于OAuth2标准的服务接口供乙方使用。甲方还可以提供ASP.NET和node的对接库。其中node版本提供较为详细的说明和功能覆盖，对于基于其它语言的服务端须要乙方根据OAuth2协议和所提供两种库和本应用原型例程自己开发。
 </p>
 <p>
-    node版本的库和应用原型大量应用函数式编程方法和部分ECMAScript 6（Javascript 版本）语法，并使用 
+    node版本的库和应用原型大量使用函数式编程方法和部分ECMAScript 6（Javascript 版本）语法，并基于 
     <a href="https://promisesaplus.com/" target="_blank">Promise/A+</a>（由 <a href="https://github.com/petkaantonov/bluebird" target="_blank">bluebird</a> 实现）规范处理异步操作，可避免在处理复杂（异步）事件回调时传统方法容易导致所谓的“回调地狱”困境，
     使得代码逻辑较为紧凑和清晰。但须要阅读者在这些方面预先了解相关的知识。例如：
 </p>
@@ -91,7 +91,7 @@
             </li>
             <li>
                 <p>
-                    <strong>Administration</strong>页：访问须要用户认证，但并非所有签入用户都可以访问。系统根据后台制定的规则，限制访问该页所需要的角色和端点。访问控制同样是通过该页面相关路由规则插入用户认证中间件完成。
+                    <strong>Administration</strong>页：访问须要用户认证，但并非所有签入用户都可以访问。系统根据后台制定的规则，限制访问该页所需要的角色和端点。访问控制同样是通过在该页面相关路由规则中插入用户认证中间件来完成。
                 </p>
 <pre><code>    router.get('/admin', <span style="color:blue">auth.check('admin_page_acl')</span>, (req, res) => {
         <span style="text-decoration: line-through">userStore.getAccessControl('admin_page_acl').then((acl) => {</span>
@@ -119,9 +119,9 @@
     }
 </code></pre>
                 <p>
-                    表示只有拥有“roles”角色列表中的角色，并且在被允许的端点上访问时，该网页才可以被允许访问。允许访问端点由“endpoints”中的黑名单列表“blacklist”和白名单列表“whitelist”同时控制。黑名单列表具有优先权，即一个端点的标识如果在黑名单中，
-                    则不管它是否在白名单中都是不允许访问的端点。关于“白名单”和“黑名单”设置与否时的详细逻辑可以在“OAuth2客户端库”中的 <code>isEndpointAllowed</code> 函数中找到。乙方也可以使用自己定义的逻辑。                   
-                    允许访问端点的标识则需根据具体测试环境在数据库的“endpoints”的白名单中添加，不允许的端点则在相应的黑名单中添加。允许访问的角色在“roles”添加，添加的角色由乙方系统定义。
+                    表示只有拥有“roles”角色列表中的角色（之一或更多），并且使用被允许的端点时，该网页才可以被允许访问。允许访问端点由“endpoints”中的黑名单列表“blacklist”和白名单列表“whitelist”同时控制。黑名单列表具有优先权，即一个端点的标识如果在黑名单中，
+                    则不管它是否在白名单中都是不允许访问的端点。关于“白名单”和“黑名单”设置与否时的详细逻辑可以在“OAuth2客户端库”（<code>lib</code> 目录下的 <code>1-net-oauth2.js</code> 文件）中的 <code>isEndpointAllowed</code> 函数中找到。乙方也可以使用自己定义的逻辑。                   
+                    允许访问端点的标识则需根据具体测试要求在数据库的“endpoints”的白名单中添加，不允许的端点则应将其标识加入相应的黑名单中。允许访问的角色在“roles”添加，添加的角色由乙方系统定义。
                     相应账户所拥有的角色在“user_roles”表中添加，其中每个条目的键值都对应于某一网账户的标识，其内容是该账户所拥有的角色列表。例如
                 </p>
 <pre><code>    "user_roles": {
@@ -132,10 +132,9 @@
     }
 </code></pre>
                 <p>
-                    如果希望使用某端点访问此页时，首先用户要使用该端点，在一（一网）账户签入网站，然后用户就可在首页上读取相应的端点标识。使用一编辑器将从页面上读取的标识添加到“endpoints”白名单表中即可。所提供
-                    的相应列表只起演示的作用，开发人员测试时应将它们替换为自己端点的标识。管理员还可以使用编辑器在 <code>database.json</code> 文件中的“access_controls”添加具有任意标识（访问控制策略ID）的不同
-                    访问控制策略条目，当需要使用它时，只要将此表识作为参数调用
-                    <code>auth.check('...访问控制策略ID...')</code> 即可得到相应的中间件。在实际应用中，乙方的数据库系统须根据策略ID返回同样格式的访问控制策略数据。
+                    所提供的相应列表只起演示的作用，开发人员测试时应将它们替换为自己端点的标识。测试者如果希望使用某端点访问此页时，可采取以下步骤实现。首先用户使用该端点，在（一网）账户签入网站。
+                    之后用户就可在首页上读取到相应的端点标识。使用一编辑器将从页面上读取的标识添加到“endpoints”白名单表中即可。管理员还可以使用编辑器在 <code>database.json</code> 文件中的“access_controls”添加具有任意标识（访问控制策略ID）的不同
+                    访问控制策略条目，当需要使用它时，只要将此表识作为参数调用 <code>auth.check('...访问控制策略ID...')</code> 即可。在实际应用中，乙方的数据库系统须根据策略ID返回同样格式的访问控制策略数据。
                 </p>
                 <p>
                     如果不想限制访问端点，可在相应访问控制策略中删除“endpoints”白名单。如果不想使用角色限制访问，可在相应访问控制策略中删除“roles”白名单。注意这里删除指的并非是将其内容清空，而是不添加该条目。
@@ -162,6 +161,7 @@ oauth.initialize(config.oauth, userStore);
 const routes = require('./routes/index');
 ...
 </code></pre>
+        <p>注意在目前的库结构中，库德依赖注入必须在加载路由器之前。</p>
         <h3 class="header">配置格式</h3>
         <p>
             库使用的各类参数通过JSON格式的配置文件设置。此原型应用的有关配置文件是 <code>config</code> 目录中名为 <code>config.js</code> 的文件，起始时该文件并不存在，乙方应该自己创建它。
@@ -192,7 +192,7 @@ const routes = require('./routes/index');
         }
     }
 </code></pre>
-        这里的 <code>accessProtocol</code> 是乙方应用在公网上的入口使用的HTTP协议，可选值为<code>http</code> 和 <code>https</code>； <code>authKey</code> 是一用户自设的随机密钥，用来对认证过程的敏感数据加密； 
+        这里的 <code>accessProtocol</code> 是乙方应用在公网上的入口使用的HTTP协议，可选值为<code>http</code> 和 <code>https</code>； <code>authKey</code> 是一用户自设的随机密钥，用来对认证过程中网上来回传送的敏感数据进行加密； 
         <code>viewType</code> 是用来选择一网签入界面的，可选值是“browser”、“mobile”和“desktop”； <code>returnPath</code> 
         是用户从一网认证完并取得授权码后一网将客户端重新定向到乙方的路径。在本原型应用中系统的路由（见 <code>routes/index.js</code>）已经包含处理函数：
 <pre><code>router.get(config.oauth.<span style="color: red">returnPath</span>, (req, res, next) => {
@@ -208,26 +208,30 @@ const routes = require('./routes/index');
     }).done();
 });
 </code></pre>
-        <p>这里的处理函数首先调用了上述 <code>callback</code> 之后又调用了 <code>login</code> 接口。乙方在所涉设置中设置一个 <code>authKey</code>， 填入通过甲方获取的 
-        <code>clientId</code>、<code>clientSecret</code>以及<code>endponts</code> 中的 <code>baseUrl</code> 后即可正常启动原型应用。</p>
+        <p>
+          这里的处理函数首先调用了本库提供的标准接口之一： <code>callback</code> （见下）之后又调用了其 <code>login</code> 接口。
+        </p>
+        <p>
+          乙方须要在所涉设置中设置一个 <code>authKey</code>， 填入通过甲方获取的 <code>clientId</code>、<code>clientSecret</code> 以及 <code>endponts</code> 中的 <code>baseUrl</code> 后即可正常启动原型应用。
+        </p>
         <h3 class="header">依赖接口</h3>
         <p>
             本认证库依赖于用户数据库系统提供的以下接口：
         </p>
         <ul>
             <li>
-                <code>mapUser(req, authInfo)</code>：当使用用户授权令牌，成功从一网服务获取签入令牌（“access token”）和用户详细信息后，本库将这两者数据打包在 <code>authInfo</code> 内并调用
+                <code>mapUser(req, authInfo)</code>：当使用用户授权令牌，成功从一网服务获取访问令牌（“access token”）和用户详细信息后，本库将这两部分数据打包在 <code>authInfo</code> 内并调用
                 <code>mapUser(req, authInfo)</code>。乙方应根据自我的应用逻辑决定怎样使用该信息。
             </li>
             <li>
-                <code>updateToken(req, token)</code>：当本库发现用户的签入令牌已经过期并成功刷新签入令牌后，将调用 <code>updateToken(req, token)</code>。这里的 <code>token</code> 是新获得的签入令牌。
+                <code>updateToken(req, token)</code>：当本库发现用户的访问令牌已经过期并成功刷新访问令牌后，将调用 <code>updateToken(req, token)</code>。这里的 <code>token</code> 是新获得的访问令牌。
                 同样，怎样使用该信息是乙方自己的责任。
             </li>
             <li>
                 <code>unmapUser(user)</code>：当用户成功签出后，本库将调用 <code>unmapUser(user)</code>。这里的 <code>user</code> 不但包含（一网）用户标识，还包含当前终端的标识。
             </li>
             <li>
-                <code>getAccessControl(policyId)</code>：本库根据认证请求的策略ID（<code>policyId</code>），调用该接口来得到相应的访问控制策略。
+                <code>getAccessControl(policyId)</code>：本库根据认证请求的策略ID（<code>policyId</code>），调用该接口来从乙方数据库得到相应的访问控制策略。
             </li>
         </ul>
         <h3 class="header">提供接口</h3>
@@ -237,8 +241,8 @@ const routes = require('./routes/index');
         <ul>
             <li>
                 <p>
-                    <code>check</code>：基于提供的一个可空的访问控制策略ID，返回应 OAuth2 认证中间件。如果用户尚未签入，则启动OAuth2认证流程。如果访问控制策略ID为非空并且查找到相应策略，根据所得策略检查该访问是否可以放行。
-                    对于可以放行的访问，检查相应的访问令牌是否过期。如果访问令牌已经过期，先对令牌进行更新。
+                    <code>check</code>：基于提供的一个可空的访问控制策略ID，返回 OAuth2 认证中间件。如果用户尚未签入，则启动 OAuth2 认证流程。如果访问控制策略ID为非空并且乙方提供了相应的策略，根据所得策略检查该访问是否可以放行。
+                    对于可以放行的访问，检查相应的访问令牌是否过期。如果访问令牌已经过期，则首先尝试对令牌进行更新。
                 </p>
             </li>
             <li>
@@ -248,8 +252,8 @@ const routes = require('./routes/index');
             </li>
             <li>
                 <p>
-                    <code>callback</code>：在OAuth2认证流程中，当用户在一网认证完成并得到对乙方的授权令牌后，用户的客户端应用端应用携带该授权令牌回访在预先设置的“returnPath”，乙方系统接收访问并调用本库的 <code>callback</code>
-                    接口进行处理。
+                    <code>callback</code>：在 OAuth2 认证流程中，当用户在一网认证完成并得到对乙方的授权令牌后（OAuth2 术语），用户的客户应用端应用携带该授权令牌回访设置好的（乙方服务的）“returnPath”，乙方系统接收访问后调用本库的 <code>callback</code>
+                    接口进行下一步处理（获取访问令牌、获取用户详细信息，等）。
             </li>
             <li>
                 <code>login</code>：如果用户OAuth2认证流程成功结束，乙方系统调用该接口来保存所得到的访问令牌并建立签入会话（session），以便用户不用每次访问都须要走认证流程。
@@ -263,9 +267,9 @@ const routes = require('./routes/index');
         </p>
         <h3 class="header">数据结构</h3>
         <p>
-            用户成功认证后本库返回JSON格式的签入令牌和（一网）用户细节。乙方可以通过观察本原型应用的位于 <code>data</code> 目录中的 <code>database.json</code> 文件中的“user_auth_table”节点得到相关信息。
-            该节点中的键值对应于签入账户的（一网）标识，其对应对象中的“user_details”则承载相应账户的细节信息，而“auth_tokens”对象则包含签入该账户的不同端点所得到的签入令牌。其中的系列键值就是该端点的标识，
-            而其对应的内容就是签入令牌。
+            用户成功认证后本库返回JSON格式的访问令牌和（一网）用户细节。乙方可以通过观察本原型应用的位于 <code>data</code> 目录中的 <code>database.json</code> 文件中的“user_auth_table”节点得到相关信息。
+            该节点中的键值对应于签入账户的（一网）标识，其对应对象中的“user_details”则承载相应账户的细节信息，而“auth_tokens”对象则包含签入该账户的不同端点所得到的访问令牌。其中的系列键值就是该端点的标识，
+            而其对应的内容就是访问令牌。
         </p>
         <p>
             “user_auth_table”节点在原型应用没有任何用户签入时是空的（这只是随意的设计，没有其他考量。乙方可根据自身的需求对签出用户在 <code>unmapUser(user)</code> 中处理。），因此要想得到相应的数据结构信息，
