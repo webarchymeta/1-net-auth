@@ -43,7 +43,7 @@ router.get('/work', auth.check(), (req, res) => {
 });
 
 router.get('/readme', (req, res, next) => {
-    res.render('readme.html', { login: req.user });
+    res.render('readme.html', { login: req.session.user });
 });
 
 router.get('/', (req, res) => {
