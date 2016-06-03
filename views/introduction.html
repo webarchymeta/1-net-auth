@@ -168,8 +168,9 @@ const routes = require('./routes/index');
             该目录中已经有一个名为<code>sample-config.js</code>的样本设置文件，乙方可以借鉴它的格式结合自己的参数来建立初始的<code>config.js</code>。认证相关的配置全部包含在其中的 “oauth”节点中：
         </p>
 <pre><code>    oauth: {
-        debugMode: true,
+        debugMode: false,
         accessProtocol: 'http',
+        accessPort: undefined,
         authKey: '...',
         viewType: 'browser',
         returnPath: '/external_signin',
@@ -192,9 +193,32 @@ const routes = require('./routes/index');
         }
     }
 </code></pre>
-        这里的 <code>accessProtocol</code> 是乙方应用在公网上的入口使用的HTTP协议，可选值为<code>http</code> 和 <code>https</code>； <code>authKey</code> 是一用户自设的随机密钥，用来对认证过程中网上来回传送的敏感数据进行加密； 
-        <code>viewType</code> 是用来选择一网签入界面的，可选值是“browser”、“mobile”和“desktop”； <code>returnPath</code> 
-        是用户从一网认证完并取得授权码后一网将客户端重新定向到乙方的路径。在本原型应用中系统的路由（见 <code>routes/index.js</code>）已经包含处理函数：
+        这里
+        <ul>
+            <li>
+                <p>
+                    <code>accessProtocol</code> 是乙方应用在公网入口上使用的HTTP协议，可选值为<code>http</code> 和 <code>https</code>。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>accessPort</code> 是乙方应用在公网上口上使用的端口，如果使用相应协议的标准端口，则见其值设为 <code>undefined</code> 或 <code>null</code>。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>authKey</code> 是一用户自设的随机密钥，用来对认证过程中网上来回传送的敏感数据进行加密。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>viewType</code> 是用来选择一网签入界面的，可选值是“browser”、“mobile”和“desktop”。
+                </p>
+            </li>
+            <li>
+                <p>
+                    <code>returnPath</code> 是用户从一网认证完并取得授权码后一网将客户端重新定向到乙方的路径。在本原型应用中系统的路由（见 <code>routes/index.js</code>）已经包含处理函数：
+                </p>
 <pre><code>router.get(config.oauth.<span style="color: red">returnPath</span>, (req, res, next) => {
     auth.callback(req).then(result => {
         if (!result.ok) {
@@ -208,9 +232,11 @@ const routes = require('./routes/index');
     }).done();
 });
 </code></pre>
-        <p>
-          这里的处理函数首先调用了本库提供的标准接口之一： <code>callback</code> （见下）之后又调用了其 <code>login</code> 接口。
-        </p>
+                <p>
+                    这里的处理函数首先调用了本库提供的标准接口之一： <code>callback</code> （见下）之后又调用了其 <code>login</code> 接口。
+                </p>
+            </li>
+        </ul>
         <p>
           乙方须要在所涉设置中设置一个 <code>authKey</code>， 填入通过甲方获取的 <code>clientId</code>、<code>clientSecret</code> 以及 <code>endponts</code> 中的 <code>baseUrl</code> 后即可正常启动原型应用。
         </p>
@@ -280,10 +306,11 @@ const routes = require('./routes/index');
         <h3>数据库原型</h3>
         <p>
             本原型应用使用JSON对象保存所有相关数据。该JSON对象使用文件系统进行持久化。相关的实现在 <code>lib</code> 目录下的 <code>user-store.js</code> 文件中可以找到。数据文件是 <code>data</code> 
-            目录中的 <code>database.json</code>。开始时该文件并不存在，应用第一次运行时会创建一个空的文件。用户可以参考同目录中的 <code>sample-database.json</code> 的结构对其进行修改。
+            目录中的 <code>database.json</code>。开始时该文件并不存在，应用第一次运行时会创建一个几乎是空的文件（除了添加了一项对 <strong>Administration</strong> 页的访问控制项）。
+            用户可以参考同目录中的 <code>sample-database.json</code> 的结构对其进行修改。
         </p>
         <p>
-            用户可以通过通用文字编辑器实时修改该文件，例如添加或修改的访问策略、添加或修改用户的角色等，修改的结果可以立即体现出来，并不必重启应用。
+            用户可以通过通用文字编辑器实时修改该文件，例如添加或修改的访问策略、添加或修改用户的角色等，只要修改后的文件仍然是合法的JSON文档，结果可以立即体现出来，并不必重启应用。
         </p>
     </li>
 </ol>
