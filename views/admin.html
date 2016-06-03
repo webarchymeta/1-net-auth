@@ -13,11 +13,14 @@
     <p>
         Current allowed roles for this page:
     </p>
+    <% if (acl.roles) { %>
     <ul>
         <% acl.roles.forEach(function(r) {%>
         <li>role: <b><%= r %></b></li>
         <% }) %>
     </ul>
+    <% } %>
+    <% if (acl.endpoints) { %>
     <hr />
     <% if (acl.endpoints.whitelist) { %>
     <p>
@@ -40,6 +43,7 @@
         <% }) %>
     </ul>
     <hr />
+    <% } %>
     <% } %>
     <% if (login) { %>
     <p>

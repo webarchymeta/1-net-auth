@@ -22,6 +22,7 @@ module.exports = {
     oauth: {
         debugMode: true,
         accessProtocol: 'http',
+        accessPort: undefined,
         authKey: '--- create your random security key ---',
         viewType: 'browser',
         returnPath: '/external_signin',

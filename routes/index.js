@@ -21,8 +21,8 @@ router.get(config.oauth.returnPath, (req, res, next) => {
         return auth.login(req, result).then(() => {
             res.redirect(result.returnTo);
         });
-    }).catch(() => {
-        next('login failed');
+    }).catch((ex) => {
+        next('login failed: ' + ex.err);
     }).done();
 });
 
