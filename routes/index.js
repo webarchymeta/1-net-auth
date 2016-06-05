@@ -34,20 +34,20 @@ router.get('/login', auth.check(), (req, res) => {
 
 router.get('/admin', auth.check('admin_page_acl'), (req, res) => {
     userStore.getAccessControl('admin_page_acl').then((acl) => {
-        res.render('admin.html', { title: 'Administration page', acl: acl, login: req.user });
+        res.render('admin.html', { title: 'Administration page', acl: acl, login: req.isAuthenticated() });
     });
 });
 
 router.get('/work', auth.check(), (req, res) => {
-    res.render('work.html', { title: 'Work page', login: req.user });
+    res.render('work.html', { title: 'Work page', login: req.isAuthenticated() });
 });
 
 router.get('/readme', (req, res, next) => {
-    res.render('readme.html', { login: req.session.user });
+    res.render('readme.html', { login: req.isAuthenticated() });
 });
 
 router.get('/', (req, res) => {
-    res.render('index.html', { title: '1-NET sign in demo', login: req.session.user });
+    res.render('index.html', { title: '1-NET sign in demo', login: req.isAuthenticated() });
 });
 
 module.exports = router;

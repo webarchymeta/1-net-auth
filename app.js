@@ -15,7 +15,8 @@ const _ = require('lodash'),
 
 const app = express();
 
-oauth.initialize(config.oauth, userStore);
+oauth.initialize(app, config.oauth, userStore);
+
 const routes = require('./routes/index');
 
 if (process.cwd() !== __dirname) {
