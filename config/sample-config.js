@@ -40,6 +40,9 @@ module.exports = {
                 },
                 user: {
                     apiPath: 'api/signin/user'
+                },
+                endpoint: {
+                    apiPath: 'api/signin/endpoint'
                 }
             }
         }
